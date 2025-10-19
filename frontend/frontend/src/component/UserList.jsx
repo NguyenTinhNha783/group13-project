@@ -1,22 +1,25 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function UserList() {
+function App() {
   const [users, setUsers] = useState([]);
 
+  // Gọi API backend
   useEffect(() => {
-    // Lấy dữ liệu từ backend
     axios.get("http://localhost:3000/users")
       .then(res => setUsers(res.data))
-      .catch(err => console.error(err));
+      .catch(err => console.error("Lỗi khi tải dữ liệu:", err));
   }, []);
 
   return (
-    <div>
-      <h2>Danh sách User</h2>
+    <div style={{ padding: 20 }}>
       <ul>
-        {users.map(u => <li key={u.id}>{u.name}</li>)}
+        {users.map(user => (
+          <li key={user._id}>{user.name} - {user.email}</li>
+        ))}
       </ul>
     </div>
   );
 }
+
+export default App;
