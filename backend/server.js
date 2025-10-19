@@ -1,4 +1,5 @@
 const express = require('express');
+<<<<<<< HEAD
 const mongoose = require('mongoose');
 const cors = require('cors');  // ← THÊM DÒNG NÀY
 const User = require('./models/User'); 
@@ -41,3 +42,15 @@ app.get('/', (req, res) => {
 app.listen(3000, () => {
   console.log('🚀 Server đang chạy tại http://localhost:3000');
 });
+=======
+const app = express();
+
+app.use(express.json());
+
+const userRoutes = require('./routes/user');
+app.use(userRoutes);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+>>>>>>> backend
