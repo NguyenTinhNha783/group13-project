@@ -5,21 +5,55 @@ import axios from "axios";
 
 function App() {
   const [users, setUsers] = useState([]);
+  const [editingUser, setEditingUser] = useState(null); // user đang sửa
+  const [name, setName] = useState(""); // input sửa name
+  const [email, setEmail] = useState(""); // input sửa email
 
   // Lấy danh sách user từ backend
-  useEffect(() => {
+  const fetchUsers = () => {
     axios
       .get("http://localhost:3000/users")
       .then((res) => setUsers(res.data))
       .catch((err) => console.error("Lỗi khi tải user:", err));
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   // Thêm user xong thì tải lại danh sách
   const handleUserAdded = () => {
-    axios
-      .get("http://localhost:3000/users")
-      .then((res) => setUsers(res.data))
-      .catch((err) => console.error(err));
+    fetchUsers();
+  };
+
+  // Xóa user
+  const handleDelete = async (id) => {
+    if (window.confirm("Bạn có chắc muốn xóa user này?")) {
+      await axios.delete(`http://localhost:3000/users/${id}`);
+      setUsers(users.filter((u) => u._id !== id));
+    }
+  };
+
+  // Mở form sửa
+  const handleEdit = (user) => {
+    setEditingUser(user);
+    setName(user.name);
+    setEmail(user.email);
+  };
+
+  // Lưu thay đổi
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    if (!name || !email) {
+      alert("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+    await axios.put(`http://localhost:3000/users/${editingUser._id}`, {
+      name,
+      email,
+    });
+    setEditingUser(null);
+    fetchUsers();
   };
 
   return (
@@ -45,8 +79,9 @@ function App() {
         >
           <thead>
             <tr style={{ backgroundColor: "#007bff", color: "white" }}>
-              <th style={{ padding: "10px", textAlign: "left", width: "40%" }}>Tên</th>
-              <th style={{ padding: "10px", textAlign: "left", width: "60%" }}>Email</th>
+              <th style={{ padding: "10px", textAlign: "left", width: "30%" }}>Tên</th>
+              <th style={{ padding: "10px", textAlign: "left", width: "40%" }}>Email</th>
+              <th style={{ padding: "10px", textAlign: "center", width: "30%" }}></th>
             </tr>
           </thead>
           <tbody>
@@ -61,17 +96,57 @@ function App() {
                 >
                   <td style={{ padding: "10px" }}>{user.name}</td>
                   <td style={{ padding: "10px" }}>{user.email}</td>
+                  <td style={{ padding: "10px", textAlign: "center" }}>
+                    <button
+                      onClick={() => handleEdit(user)}
+                      style={{ marginRight: "8px" }}
+                    >
+                      Sửa
+                    </button>
+                    <button onClick={() => handleDelete(user._id)}>Xóa</button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="2" style={{ textAlign: "center", padding: "15px" }}>
+                <td colSpan="3" style={{ textAlign: "center", padding: "15px" }}>
                   Không có người dùng nào.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+
+        {/* --- Form sửa user --- */}
+        {editingUser && (
+          <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
+            <h3>Sửa User: {editingUser.name}</h3>
+            <form onSubmit={handleUpdate}>
+              <div style={{ marginBottom: "10px" }}>
+                <label>Tên: </label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={{ marginLeft: "10px" }}
+                />
+              </div>
+              <div style={{ marginBottom: "10px" }}>
+                <label>Email: </label>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{ marginLeft: "10px" }}
+                />
+              </div>
+              <button type="submit" style={{ marginRight: "8px" }}>
+                Lưu
+              </button>
+              <button type="button" onClick={() => setEditingUser(null)}>
+                Hủy
+              </button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
