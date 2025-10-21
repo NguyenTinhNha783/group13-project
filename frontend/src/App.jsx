@@ -27,12 +27,18 @@ function App() {
   };
 
   // Xóa user
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa user này?")) {
-      await axios.delete(`http://localhost:3000/users/${id}`);
-      setUsers(users.filter((u) => u._id !== id));
-    }
-  };
+ const handleDelete = async (userId) => {
+        if (window.confirm("Xóa người dùng này ?")) {
+            try {
+                await axios.delete(`http://localhost:3000/${userId}`);
+                alert("Xóa người dùng thành công!");
+                fetchUsers();
+            } catch (err) {
+                console.error("Lỗi khi xóa người dùng:", err);
+                alert("Có lỗi xảy ra khi xóa người dùng.");
+            }
+        }
+    };
 
   // Mở form sửa
   const handleEdit = (user) => {
@@ -48,7 +54,7 @@ function App() {
       alert("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
-    await axios.put(`http://localhost:3000/users/${editingUser._id}`, {
+    await axios.put(`http://localhost:3000/${editingUser._id}`, {
       name,
       email,
     });
