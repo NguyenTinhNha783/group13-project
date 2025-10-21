@@ -1,48 +1,123 @@
-let users = [
-  { id: 1, name: "Nguyễn Tịnh Nhã", email: "nha226435@student.nctu.edu.vn" },
-  { id: 2, name: "Lâm Hoàng Khang", email: "khang223039@student.nctu.edu.vn" },
-  { id: 3, name: "Từ Công Vinh", email: "vinh222918@student.nctu.edu.vn" }
-];
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-// GET: lấy danh sách user
-exports.getUsers = (req, res) => {
-  res.json(users);
-};
+// ==========================
+//  AUTHENTICATION
+// ==========================
 
-// POST: thêm user mới (basic validation)
-exports.createUser = (req, res) => {
-  if (!req.body || !req.body.name || !req.body.email) {
-    return res.status(400).json({ message: "Name và email là bắt buộc" });
-  }
+// Đăng ký (Sign up)
+exports.signup = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password)
+      return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin" });
 
-  const newUser = {
-    id: users.length ? Math.max(...users.map(u => u.id)) + 1 : 1,
-    name: req.body.name,
-    email: req.body.email
-  };
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(400).json({ message: "Email đã tồn tại" });
 
-  users.push(newUser);
-  res.status(201).json(newUser);
-};
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password: hashedPassword });
+    await newUser.save();
 
-// PUT: sửa user
-exports.updateUser = (req, res) => {
-  const { id } = req.params;
-  const index = users.findIndex(u => u.id == id);
-  if (index !== -1) {
-    users[index] = { ...users[index], ...req.body };
-    return res.json(users[index]);
-  } else {
-    return res.status(404).json({ message: "User not found" });
+    res.status(201).json({ message: "Đăng ký thành công", user: { name, email } });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };
 
-// DELETE: xóa user
-exports.deleteUser = (req, res) => {
-  const { id } = req.params;
-  const exists = users.some(u => u.id == id);
-  if (!exists) return res.status(404).json({ message: "User not found" });
+// Đăng nhập (Login)
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ message: "Vui lòng nhập email và mật khẩu" });
 
-  users = users.filter(u => u.id != id);
-  res.json({ message: "User deleted" });
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(401).json({ message: "Email hoặc mật khẩu không đúng" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch)
+      return res.status(401).json({ message: "Email hoặc mật khẩu không đúng" });
+
+    const token = jwt.sign({ userId: user._id }, "SECRET_KEY", { expiresIn: "1h" });
+
+    res.json({ message: "Đăng nhập thành công", token });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};
+
+// Đăng xuất (Logout)
+exports.logout = (req, res) => {
+  // Backend không cần xóa token — client tự xóa
+  res.json({ message: "Đăng xuất thành công" });
+};
+
+// ==========================
+//  CRUD NGƯỜI DÙNG (CŨ)
+// ==========================
+
+// GET: Lấy danh sách user
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); // bỏ password cho an toàn
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};
+
+// POST: Thêm user mới (admin hoặc test)
+exports.createUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password)
+      return res.status(400).json({ message: "Thiếu name, email hoặc password" });
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
+      return res.status(400).json({ message: "Email đã tồn tại" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password: hashedPassword });
+    await newUser.save();
+    res.status(201).json({ message: "Thêm user thành công", newUser });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};
+
+// PUT: Sửa user
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+    if (!user) return res.status(404).json({ message: "Không tìm thấy user" });
+
+    res.json({ message: "Cập nhật thành công", user });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};
+
+// DELETE: Xóa user
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) return res.status(404).json({ message: "User không tồn tại" });
+
+    res.json({ message: "Xóa user thành công" });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
 };
