@@ -162,6 +162,10 @@ exports.updateProfile = async (req, res) => {
   try {
     const updateData = req.body;
     if (updateData.password) {
+      const user = await User.findById(req.user.userId);
+      const isMatch = await bcrypt.compare(updateData.oldPassword, user.password);
+  if (!isMatch) return res.status(401).json({ message: "Mật khẩu cũ không đúng" });
+
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
 
