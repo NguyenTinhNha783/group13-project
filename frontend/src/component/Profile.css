@@ -1,0 +1,44 @@
+.profile-container {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 🟢 Video nền — chỉ hiện khi chưa đăng nhập */
+.video-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  filter: brightness(0.6);
+}
+
+/* 🟢 Chưa đăng nhập: có màu chữ trắng, giữa màn hình */
+.profile-content.logged-out {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  height: 100%;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* 🟢 Đã đăng nhập: ẩn video, nền trắng bình thường */
+.profile-content.logged-in {
+  position: relative;
+  z-index: 1;
+  padding: 40px;
+  color: #222;
+  background-color: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
