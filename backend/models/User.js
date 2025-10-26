@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Schema người dùng
 const userSchema = new mongoose.Schema({
   taikhoan: { type: String, required: true, unique: true },
   name: { type: String },
@@ -7,4 +8,5 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, default: "user" }
 });
+
 module.exports = mongoose.model("User", userSchema);

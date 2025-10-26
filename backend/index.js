@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(userRoutes);
+app.use('/users', userRoutes);
 
 mongoose.connect('mongodb+srv://khang223039_db_user:LcnVp6VGUWSIEXAE@group13-project.iwftep5.mongodb.net/groupDB?retryWrites=true&w=majority')
   .then(() => console.log('✅ Kết nối MongoDB thành công'))

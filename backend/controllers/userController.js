@@ -13,11 +13,11 @@ exports.signup = async (req, res) => {
     if (!taikhoan || !name || !email || !password)
       return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin" });
 
-    // Kiểm tra tài khoản đã tồn tại chưa
     const existingUser = await User.findOne({ taikhoan });
     if (existingUser)
       return res.status(400).json({ message: "Tài khoản đã tồn tại" });
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       taikhoan,
@@ -30,14 +30,14 @@ exports.signup = async (req, res) => {
 
     res.status(201).json({
       message: "Đăng ký thành công",
-      user: { taikhoan, name, email },
+      user: { taikhoan, name, email, role: newUser.role },
     });
   } catch (err) {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };
 
-// Đăng nhập (Login)
+// Đăng nhập (Login) - hỗ trợ cả password đã hash và chưa hash
 exports.login = async (req, res) => {
   try {
     const { taikhoan, password } = req.body;
@@ -48,11 +48,31 @@ exports.login = async (req, res) => {
     if (!user)
       return res.status(401).json({ message: "Tài khoản hoặc mật khẩu không đúng" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    let isMatch = false;
+
+    // Nếu password đã hash (bắt đầu bằng $2)
+    if (user.password.startsWith("$2")) {
+      isMatch = await bcrypt.compare(password, user.password);
+    } else {
+      // Nếu password chưa hash
+      isMatch = password === user.password;
+
+      // Nếu đúng, hash luôn và lưu vào DB
+      if (isMatch) {
+        const hashed = await bcrypt.hash(password, 10);
+        user.password = hashed;
+        await user.save();
+      }
+    }
+
     if (!isMatch)
       return res.status(401).json({ message: "Tài khoản hoặc mật khẩu không đúng" });
 
-    const token = jwt.sign({ userId: user._id }, "SECRET_KEY", { expiresIn: "1h" });
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET || "SECRET_KEY",
+      { expiresIn: "1h" }
+    );
 
     res.json({
       message: "Đăng nhập thành công",
@@ -64,13 +84,13 @@ exports.login = async (req, res) => {
   }
 };
 
-// Đăng xuất (Logout)
+// Đăng xuất
 exports.logout = (req, res) => {
   res.json({ message: "Đăng xuất thành công" });
 };
 
 // ====================
-//  CRUD NGƯỜI DÙNG 
+//  CRUD NGƯỜI DÙNG (Admin)
 // ====================
 
 // GET: Lấy danh sách user
