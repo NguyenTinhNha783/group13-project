@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -5,23 +6,24 @@ const userRoutes = require('./routes/user');
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// ====== MIDDLEWARE ======
+app.use(cors()); // Cho phép truy cập từ frontend khác domain
+app.use(express.json()); // Cho phép đọc dữ liệu JSON từ body
 
-// Kết nối MongoDB
+// ====== KẾT NỐI MONGODB ======
 mongoose.connect('mongodb+srv://khang223039_db_user:LcnVp6VGUWSIEXAE@group13-project.iwftep5.mongodb.net/groupDB?retryWrites=true&w=majority&appName=group13-project')
   .then(() => console.log('✅ Kết nối MongoDB thành công'))
-  .catch(err => console.log('❌ Lỗi kết nối MongoDB:', err));
+  .catch(err => console.error('❌ Lỗi kết nối MongoDB:', err));
 
-// Routes
-app.use('/', userRoutes);
+// ====== ROUTES ======
+// Tất cả route liên quan tới người dùng sẽ bắt đầu bằng /api/users
+app.use('/api/users', userRoutes);
 
-// Trang gốc
+// ====== TRANG GỐC ======
 app.get('/', (req, res) => {
   res.send('🚀 Server đang chạy! Hãy truy cập /api/users để dùng API.');
 });
 
-// Khởi chạy server
+// ====== KHỞI ĐỘNG SERVER ======
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Server chạy tại http://localhost:${PORT}`));
