@@ -8,7 +8,7 @@ function AddUser({ onAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:3000/users", { name, email });
+      await axios.post("http://localhost:3000/api/users", { name, email });
       alert("✅ Thêm user thành công!");
       setName("");
       setEmail("");

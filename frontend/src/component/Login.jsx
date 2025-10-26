@@ -23,18 +23,23 @@ function Login({ onLogin }) {
         password,
       });
 
-      // Kiểm tra token
       if (res.data && res.data.token) {
-        // Lưu token vào localStorage
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("userId", res.data.user?.taikhoan);
+        const { token, user } = res.data;
+
+        // Lưu token và thông tin user
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", user.taikhoan);
+        localStorage.setItem("role", user.role);  // lưu role
         localStorage.setItem("isLoggedIn", "true");
 
-        // Báo cho App biết đã login
         if (onLogin) onLogin();
 
-        // Điều hướng sang Profile
-        navigate("/Profile");
+        // Điều hướng dựa theo role
+        if (user.role === "admin") {
+          navigate("/admin");       // trang admin
+        } else {
+          navigate("/profile");     // trang user
+        }
       } else {
         setIsError(true);
         setMessage(res.data.message || "Đăng nhập thất bại!");
