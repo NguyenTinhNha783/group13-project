@@ -1,0 +1,125 @@
+.edit-profile-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #3a8ef6, #6ee7b7);
+  font-family: "Poppins", sans-serif;
+  color: #333;
+  padding: 20px;
+}
+
+.edit-profile-page h2 {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.edit-profile-form {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+}
+
+.edit-profile-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.edit-profile-form input {
+  margin-top: 5px;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.edit-profile-form input:focus {
+  border-color: #3a8ef6;
+  box-shadow: 0 0 5px rgba(58, 142, 246, 0.5);
+  outline: none;
+}
+
+.edit-profile-form button {
+  background: #3a8ef6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.edit-profile-form button:hover {
+  background: #2f6acc;
+}
+
+.error, .success {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.error {
+  background: rgba(255, 77, 79, 0.2);
+  color: #ff4d4f;
+  border: 1px solid #ff4d4f;
+}
+
+.success {
+  background: rgba(102, 231, 183, 0.2);
+  color: #34a853;
+  border: 1px solid #34a853;
+}
+
+edit-profile-form .primary-btn:hover {
+  background: #2f6acc;
+}
+
+/* Nút phụ (Quay lại) */
+.edit-profile-form .secondary-btn {
+  background: #ffca28;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.edit-profile-form .secondary-btn:hover {
+  background: #e6b800;
+}
+
+
+/* Responsive */
+@media (max-width: 450px) {
+  .edit-profile-form {
+    padding: 20px 25px;
+  }
+  .edit-profile-page h2 {
+    font-size: 24px;
+  }
+}

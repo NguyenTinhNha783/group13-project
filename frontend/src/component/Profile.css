@@ -1,44 +1,166 @@
-.profile-container {
-  position: relative;
-  height: 100vh;
-  overflow: hidden;
+.profile-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #3a8ef6, #6ee7b7);
+  color: #fff;
+  padding: 20px;
 }
 
-/* 🟢 Video nền — chỉ hiện khi chưa đăng nhập */
-.video-bg {
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-weight: 600;
+}
+
+.header .logo {
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+/* HAMBURGER MENU */
+.hamburger {
+  width: 40px;
+  height: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  position: relative;
+}
+
+.hamburger .bar {
+  height: 4px;
+  border-radius: 2px;
+  background-color: white;
+}
+
+/* Menu trượt ra */
+.menu {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 35px;
+  right: 0;
+  background: white;
+  color: black;
+  border-radius: 10px;
+  width: 220px;
+  padding: 15px 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+  z-index: 100;
+}
+
+.menu p {
+  padding: 14px 25px;
+  margin: 0;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.menu p:hover {
+  background: #f0f0f0;
+}
+
+/* MAIN CONTENT */
+.profile-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+}
+
+/* PROFILE CARD */
+.profile-card {
+  text-align: center;
+  padding: 50px 80px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 25px;
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.8s ease;
+  max-width: 500px;
   width: 100%;
-  height: 100%;
+}
+
+.profile-card h2 {
+  margin: 20px 0 10px;
+  font-size: 32px;
+  text-transform: capitalize;
+}
+
+.profile-card .email,
+.profile-card .role {
+  font-size: 18px;
+  opacity: 0.95;
+  margin-bottom: 12px;
+}
+
+.profile-card span {
+  font-weight: 700;
+  color: #ffe082;
+}
+
+/* AVATAR */
+.avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid #fff;
   object-fit: cover;
-  z-index: -1;
-  filter: brightness(0.6);
+  margin-bottom: 20px;
 }
 
-/* 🟢 Chưa đăng nhập: có màu chữ trắng, giữa màn hình */
-.profile-content.logged-out {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  height: 100%;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+/* LOADING + ERROR */
+.loading-card, .error-card {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 25px 50px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+  color: #fff;
+  text-align: center;
+  font-size: 18px;
 }
 
-/* 🟢 Đã đăng nhập: ẩn video, nền trắng bình thường */
-.profile-content.logged-in {
-  position: relative;
-  z-index: 1;
-  padding: 40px;
-  color: #222;
-  background-color: #fff;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+/* ANIMATION */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .profile-card {
+    padding: 30px 40px;
+  }
+  .profile-card h2 {
+    font-size: 26px;
+  }
+  .profile-card .email,
+  .profile-card .role {
+    font-size: 16px;
+  }
+  .avatar {
+    width: 120px;
+    height: 120px;
+  }
+  .menu {
+    width: 180px;
+  }
 }

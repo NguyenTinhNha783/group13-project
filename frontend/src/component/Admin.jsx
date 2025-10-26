@@ -11,7 +11,7 @@ function QuanLyUser() {
 
   const fetchUsers = () => {
     axios
-      .get("http://localhost:3000/users")
+      .get("http://localhost:3000/api/users")
       .then((res) => setUsers(res.data))
       .catch((err) => console.error("Lỗi khi tải user:", err));
   };
