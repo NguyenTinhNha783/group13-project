@@ -29,16 +29,16 @@ function Login({ onLogin }) {
         // Lưu token và thông tin user
         localStorage.setItem("token", token);
         localStorage.setItem("userId", user.taikhoan);
-        localStorage.setItem("role", user.role);  // lưu role
+        localStorage.setItem("role", user.role);
         localStorage.setItem("isLoggedIn", "true");
 
         if (onLogin) onLogin();
 
-        // Điều hướng dựa theo role
+        // Điều hướng theo role
         if (user.role === "admin") {
-          navigate("/admin");       // trang admin
+          navigate("/admin");
         } else {
-          navigate("/profile");     // trang user
+          navigate("/profile");
         }
       } else {
         setIsError(true);
@@ -86,12 +86,19 @@ function Login({ onLogin }) {
           </button>
         </form>
 
-        <p className="switch-text">
-          Chưa có tài khoản?{" "}
-          <span className="switch-link" onClick={() => navigate("/Signup")}>
-            Đăng ký ngay
-          </span>
-        </p>
+        <div className="login-footer">
+          <p className="switch-text">
+            Chưa có tài khoản?{" "}
+            <span className="switch-link" onClick={() => navigate("/Signup")}>
+              Đăng ký ngay
+            </span>
+          </p>
+          <p className="forgot-password">
+            <span onClick={() => navigate("/ForgotPassword")}>
+              Quên mật khẩu?
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );
