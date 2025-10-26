@@ -199,3 +199,26 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };
+
+// ==========================
+//  RESET PASSWORD
+// ==========================
+
+// Tìm user theo email
+exports.findUserByEmail = async (email) => {
+    return await User.findOne({ email });
+};
+
+// Tìm user theo ID
+exports.findUserById = async (id) => {
+    return await User.findById(id);
+};
+
+// Cập nhật password
+exports.updatePassword = async (id, newPassword) => {
+    const user = await User.findById(id);
+    user.password = newPassword; // nhớ hash nếu muốn bảo mật
+    await user.save();
+    return user;
+};
+
