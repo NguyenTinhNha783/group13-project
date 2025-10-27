@@ -17,12 +17,19 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/users/forgot-password", {
+      const res = await axios.post("http://localhost:3000/users/forgot-password", {
         email,
       });
 
       setMessage(res.data.message || "Hướng dẫn reset đã được gửi tới email của bạn.");
       setIsError(false);
+
+      // ⚠️ Nếu backend trả về token test (khi chưa có email server),
+      // bạn có thể lưu vào localStorage và chuyển qua trang ResetPassword
+      if (res.data.token) {
+        localStorage.setItem("resetToken", res.data.token);
+        setTimeout(() => navigate("/users/reset-password"), 1500);
+      }
     } catch (err) {
       console.error(err);
       setIsError(true);
@@ -57,7 +64,7 @@ function ForgotPassword() {
           </button>
         </form>
 
-        <p className="back-login" onClick={() => navigate("/login")}>
+        <p className="back-login" onClick={() => navigate("/")}>
           ⬅️ Quay lại đăng nhập
         </p>
       </div>

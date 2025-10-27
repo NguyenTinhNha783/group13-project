@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AddUser from "./AddUser.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -11,23 +11,40 @@ function Admin() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  const fetchUsers = () => {
-    axios
-      .get("http://localhost:3000/api/users")
-      .then((res) => setUsers(res.data))
-      .catch((err) => console.error("Lỗi khi tải user:", err));
-  };
+  // Lấy token từ localStorage
+  const token = localStorage.getItem("token");
 
+  // Axios instance có Authorization header
+  const api = axios.create({
+    baseURL: "http://localhost:3000/users",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  // Chỉnh fetchUsers bằng useCallback
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await api.get("/");
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Lỗi khi tải user:", err);
+      if (err.response && err.response.status === 401) {
+        alert("Bạn chưa đăng nhập hoặc token hết hạn!");
+        navigate("/login");
+      }
+    }
+  }, [api, navigate]);
+
+  // Gọi fetchUsers khi component mount
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]); // đưa fetchUsers vào dependency
 
   const handleUserAdded = () => fetchUsers();
 
   const handleDelete = async (userId) => {
     if (window.confirm("Xóa người dùng này?")) {
       try {
-        await axios.delete(`http://localhost:3000/api/users/${userId}`);
+        await api.delete(`/${userId}`);
         alert("Xóa người dùng thành công!");
         fetchUsers();
       } catch (err) {
@@ -49,12 +66,14 @@ function Admin() {
       alert("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
-    await axios.put(`http://localhost:3000/api/users/${editingUser._id}`, {
-      name,
-      email,
-    });
-    setEditingUser(null);
-    fetchUsers();
+    try {
+      await api.put(`/${editingUser._id}`, { name, email });
+      setEditingUser(null);
+      fetchUsers();
+    } catch (err) {
+      console.error("Lỗi khi cập nhật user:", err);
+      alert("Có lỗi xảy ra khi cập nhật user.");
+    }
   };
 
   const handleLogout = () => {
@@ -71,7 +90,7 @@ function Admin() {
 
       <div className="admin-card">
         <h2 className="admin-subtitle">Thêm User mới</h2>
-        <AddUser onAdded={handleUserAdded} />
+        <AddUser onAdded={handleUserAdded} api={api} />
       </div>
 
       <div className="admin-card">

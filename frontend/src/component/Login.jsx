@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../axiosConfig"; // dùng axiosConfig có baseURL = http://localhost:3000/api
 import "./Login.css";
 
-function Login({ onLogin }) { 
+function Login({ onLogin }) {
   const navigate = useNavigate();
   const [taikhoan, setTaikhoan] = useState("");
   const [password, setPassword] = useState("");
@@ -18,35 +18,40 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/users/login", {
+      // Gửi yêu cầu login đến backend
+      const res = await api.post("/login", {
         taikhoan,
         password,
       });
 
-      if (res.data && res.data.token) {
-        const { token, user } = res.data;
+      const { token, user, message } = res.data;
 
-        // Lưu token và thông tin user
-        localStorage.setItem("token", token);
-        localStorage.setItem("userId", user.taikhoan);
-        localStorage.setItem("role", user.role);
-        localStorage.setItem("isLoggedIn", "true");
-
-        if (onLogin) onLogin();
-
-        // Điều hướng theo role
-        if (user.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/profile");
-        }
-      } else {
+      if (!token || !user) {
         setIsError(true);
-        setMessage(res.data.message || "Đăng nhập thất bại!");
+        setMessage(message || "Đăng nhập thất bại!");
+        return;
       }
+
+      // ✅ Lưu token + thông tin user vào localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", user._id);
+      localStorage.setItem("role", user.role);
+      localStorage.setItem("isLoggedIn", "true");
+
+      if (onLogin) onLogin(user);
+
+      // ✅ Điều hướng theo vai trò
+      if (user.role === "admin") navigate("/admin");
+      else navigate("/profile");
+
     } catch (err) {
+      console.error("❌ Lỗi đăng nhập:", err);
       setIsError(true);
-      setMessage(err.response?.data?.message || "⚠️ Lỗi kết nối server!");
+      if (err.response?.status === 401) {
+        setMessage("Sai tài khoản hoặc mật khẩu!");
+      } else {
+        setMessage("⚠️ Không thể kết nối tới server!");
+      }
     } finally {
       setLoading(false);
     }
@@ -87,14 +92,20 @@ function Login({ onLogin }) {
         </form>
 
         <div className="login-footer">
-          <p className="switch-text">
+          <p>
             Chưa có tài khoản?{" "}
-            <span className="switch-link" onClick={() => navigate("/Signup")}>
+            <span
+              className="switch-link"
+              onClick={() => navigate("/signup")}
+            >
               Đăng ký ngay
             </span>
           </p>
-          <p className="forgot-password">
-            <span onClick={() => navigate("/ForgotPassword")}>
+          <p>
+            <span
+              className="switch-link"
+              onClick={() => navigate("/forgot-password")}
+            >
               Quên mật khẩu?
             </span>
           </p>

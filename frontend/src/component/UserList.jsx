@@ -6,7 +6,7 @@ function App() {
 
   // Gọi API backend
   useEffect(() => {
-    axios.get("http://localhost:3000/api/users")
+    axios.get("http://localhost:3000/users")
       .then(res => setUsers(res.data))
       .catch(err => console.error("Lỗi khi tải dữ liệu:", err));
   }, []);

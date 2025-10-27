@@ -27,7 +27,7 @@ function Signup() {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/users/signup",
+        "http://localhost:3000/users/signup",
         formData
       );
       setIsError(false);

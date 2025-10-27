@@ -5,8 +5,10 @@ import Login from "./component/Login.jsx";
 import Profile from "./component/Profile.jsx";
 import Admin from "./component/Admin.jsx";
 import EditProfile from "./component/EditProfile.jsx";
+import ForgotPassword from "./component/ForgotPassword.jsx";
+import ResetPassword from "./component/ResetPassword.jsx";
 import ChangePassword from "./component/ChangePassword.jsx";
-import api from "./axiosConfig";
+import api from "./axiosConfig"; // baseURL = http://localhost:3000/
 
 function AppWrapper() {
   return (
@@ -20,12 +22,21 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Kiểm tra trạng thái đăng nhập từ server khi tải lại trang
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await api.get("/check-auth");
-        if (response.data.isAuthenticated) {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setIsLoggedIn(false);
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await api.get("/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.data && response.data.email) {
           setIsLoggedIn(true);
           localStorage.setItem("isLoggedIn", "true");
         } else {
@@ -50,49 +61,70 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await api.post("/logout");
-      setIsLoggedIn(false);
-      localStorage.removeItem("isLoggedIn");
+      const token = localStorage.getItem("token");
+      await api.post(
+        "/logout",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
     } catch (err) {
       console.error("Logout failed:", err.message);
-      alert("Đăng xuất thất bại, vui lòng thử lại.");
+    } finally {
+      setIsLoggedIn(false);
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("token");
     }
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div style={{ textAlign: "center", marginTop: "100px" }}>
+        Đang kiểm tra đăng nhập...
+      </div>
+    );
   }
 
   return (
     <Routes>
+      {/* Trang đăng nhập */}
       <Route path="/" element={<Login onLogin={handleLogin} />} />
+
+      {/* Trang đăng ký */}
       <Route path="/signup" element={<Signup />} />
-      
-      {/* Profile */}
+
+      {/* Quên mật khẩu */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      {/* ✅ Reset mật khẩu */}
+      <Route path="/users/reset-password/:token" element={<ResetPassword />} /> 
+
+      {/* Hồ sơ người dùng */}
       <Route
         path="/profile"
         element={isLoggedIn ? <Profile onLogout={handleLogout} /> : <Navigate to="/" />}
       />
-      
-      {/* Edit Profile */}
+
+      {/* Chỉnh sửa hồ sơ */}
       <Route
         path="/edit-profile"
         element={isLoggedIn ? <EditProfile /> : <Navigate to="/" />}
       />
 
-      {/* Change Password */}
+      {/* Đổi mật khẩu */}
       <Route
         path="/change-password"
         element={isLoggedIn ? <ChangePassword /> : <Navigate to="/" />}
       />
 
-      {/* Quản lý user */}
+      {/* Trang admin */}
       <Route
         path="/admin"
         element={isLoggedIn ? <Admin onLogout={handleLogout} /> : <Navigate to="/" />}
       />
 
-      {/* Redirect tất cả các route khác về "/" */}
+      {/* Route mặc định */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

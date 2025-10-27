@@ -1,29 +1,36 @@
-// server.js
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const userRoutes = require('./routes/user');
+const userRoutes = require('./routes/user'); // route user
+const sendEmail = require('./utils/sendEmail');
+
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
+
 
 const app = express();
 
-// ====== MIDDLEWARE ======
-app.use(cors()); // Cho phép truy cập từ frontend khác domain
-app.use(express.json()); // Cho phép đọc dữ liệu JSON từ body
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-// ====== KẾT NỐI MONGODB ======
-mongoose.connect('mongodb+srv://khang223039_db_user:LcnVp6VGUWSIEXAE@group13-project.iwftep5.mongodb.net/groupDB?retryWrites=true&w=majority&appName=group13-project')
-  .then(() => console.log('✅ Kết nối MongoDB thành công'))
-  .catch(err => console.error('❌ Lỗi kết nối MongoDB:', err));
+// Mount route /users
+app.use('/users', userRoutes);
 
-// ====== ROUTES ======
-// Tất cả route liên quan tới người dùng sẽ bắt đầu bằng /api/users
-app.use('/api/users', userRoutes);
-
-// ====== TRANG GỐC ======
+// Trang gốc
 app.get('/', (req, res) => {
-  res.send('🚀 Server đang chạy! Hãy truy cập /api/users để dùng API.');
+  res.send('🚀 Server đang chạy! Truy cập /users để dùng API.');
 });
 
-// ====== KHỞI ĐỘNG SERVER ======
+// Kết nối MongoDB
+mongoose.connect(
+  'mongodb+srv://khang223039_db_user:LcnVp6VGUWSIEXAE@group13-project.iwftep5.mongodb.net/groupDB?retryWrites=true&w=majority&appName=group13-project'
+)
+  .then(() => console.log('✅ Kết nối MongoDB thành công'))
+  .catch(err => console.log('❌ Lỗi kết nối MongoDB:', err));
+
+// Khởi chạy server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🌐 Server chạy tại http://localhost:${PORT}`));
