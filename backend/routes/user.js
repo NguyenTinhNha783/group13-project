@@ -127,4 +127,7 @@ router.post('/upload-avatar', authMiddleware, parser.single('avatar'), async (re
     }
 });
 
+// Làm mới access token
+router.post('/refresh', userController.refreshToken);
+
 module.exports = router;
