@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const RefreshToken = require("../models/RefreshToken");
 
 // ==========================
 //  AUTHENTICATION
@@ -65,28 +66,101 @@ exports.login = async (req, res) => {
       }
     }
 
-    if (!isMatch)
+  if (!isMatch)
       return res.status(401).json({ message: "Tài khoản hoặc mật khẩu không đúng" });
 
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.JWT_SECRET || "SECRET_KEY",
-      { expiresIn: "1h" }
+    // 1. Chuẩn bị payload để đưa vào token
+    const userPayload = { userId: user._id, role: user.role };
+
+    // 2. Tạo Access Token (ngắn hạn) và Refresh Token (dài hạn)
+    const accessToken = jwt.sign(
+      userPayload,
+      process.env.JWT_ACCESS_KEY,
+      { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN }
     );
 
+    const refreshToken = jwt.sign(
+      userPayload,
+      process.env.JWT_REFRESH_KEY,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+    );
+
+    // 3. Xóa các refresh token cũ của user này (nếu có) và lưu token mới vào DB
+    await RefreshToken.deleteMany({ user: user._id });
+    const newRefreshToken = new RefreshToken({ user: user._id, token: refreshToken });
+    await newRefreshToken.save();
+
+    // 4. Trả về cả 2 token cho client
     res.json({
       message: "Đăng nhập thành công",
-      token,
+      accessToken, // Token cũ giờ là accessToken
+      refreshToken, // Token mới
       user: { taikhoan: user.taikhoan, name: user.name, role: user.role },
     });
+    
   } catch (err) {
     res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };
 
 // Đăng xuất
-exports.logout = (req, res) => {
-  res.json({ message: "Đăng xuất thành công" });
+exports.logout = async (req, res) => {
+  try {
+    // Client sẽ gửi refreshToken trong body của request
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(400).json({ message: "Yêu cầu cần có Refresh Token" });
+    }
+
+    // Tìm và xóa token tương ứng trong database
+    await RefreshToken.deleteOne({ token: refreshToken });
+
+    res.json({ message: "Đăng xuất thành công" });
+  } catch (err) {
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};
+
+// ==========================
+//  REFRESH TOKEN
+// ==========================
+
+// Tạo mới Access Token từ Refresh Token
+exports.refreshToken = async (req, res) => {
+  try {
+    // 1. Lấy refresh token từ body
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'Yêu cầu cần có Refresh Token' });
+    }
+
+    // 2. Kiểm tra xem refresh token có tồn tại trong database không
+    const storedToken = await RefreshToken.findOne({ token: refreshToken });
+    if (!storedToken) {
+      // Nếu không có, token đã bị thu hồi (do logout hoặc bị tấn công)
+      return res.status(403).json({ message: 'Refresh Token không hợp lệ' });
+    }
+
+    // 3. Nếu token có trong DB, xác thực nó (kiểm tra chữ ký và thời gian hết hạn)
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_KEY, (err, user) => {
+      if (err) {
+        // Nếu xác thực thất bại (hết hạn, sai chữ ký,...)
+        return res.status(403).json({ message: 'Refresh Token không hợp lệ hoặc đã hết hạn' });
+      }
+
+      // 4. Nếu mọi thứ đều hợp lệ, tạo một Access Token MỚI
+      const newAccessToken = jwt.sign(
+        { userId: user.userId, role: user.role }, // Payload lấy từ refresh token đã giải mã
+        process.env.JWT_ACCESS_KEY,
+        { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN }
+      );
+
+      // 5. Gửi Access Token mới về cho client
+      res.status(200).json({ accessToken: newAccessToken });
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
 };
 
 // ====================
