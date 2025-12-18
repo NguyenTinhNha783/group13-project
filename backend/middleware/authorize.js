@@ -16,4 +16,8 @@ module.exports = (roleRequired) => {
       return res.status(401).json({ message: 'Token không hợp lệ!' });
     }
   };
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 2ab4e8920067af3b26b4e972f3b1313c4ae18f61

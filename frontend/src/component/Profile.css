@@ -1,0 +1,225 @@
+.profile-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #3a8ef6, #6ee7b7);
+  color: #fff;
+  padding: 20px;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-weight: 600;
+}
+
+.header .logo {
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+/* HAMBURGER MENU */
+.hamburger {
+  width: 40px;
+  height: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  position: relative;
+}
+
+.hamburger .bar {
+  height: 4px;
+  border-radius: 2px;
+  background-color: white;
+}
+
+/* Menu trượt ra */
+.menu {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  background: white;
+  color: black;
+  border-radius: 10px;
+  width: 250px;
+  padding: 15px 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+  z-index: 100;
+}
+
+.menu p {
+  padding: 14px 25px;
+  margin: 0;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.menu p:hover {
+  background: #f0f0f0;
+}
+
+/* MAIN CONTENT */
+.profile-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+}
+
+/* PROFILE CARD */
+.profile-card {
+  text-align: center;
+  padding: 50px 80px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 25px;
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.8s ease;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+}
+
+.profile-card h2 {
+  margin: 20px 0 10px;
+  font-size: 32px;
+  text-transform: capitalize;
+}
+
+.profile-card .email,
+.profile-card .role {
+  font-size: 18px;
+  opacity: 0.95;
+  margin-bottom: 12px;
+}
+
+.profile-card span {
+  font-weight: 700;
+  color: #ffe082;
+}
+
+/* AVATAR */
+.avatar-wrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #fff;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.avatar-wrapper:hover .avatar {
+  transform: scale(1.05);
+}
+
+/* Overlay icon bấm đổi avatar */
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.4);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.avatar-wrapper:hover .avatar-overlay {
+  opacity: 1;
+}
+
+/* Nút upload avatar */
+.upload-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 25px;
+  background-color: #28a745;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.upload-btn:hover {
+  background-color: #218838;
+  transform: scale(1.05);
+}
+
+/* LOADING + ERROR */
+.loading-card, .error-card {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 25px 50px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+  color: #fff;
+  text-align: center;
+  font-size: 18px;
+}
+
+/* ANIMATION */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .profile-card {
+    padding: 30px 40px;
+  }
+  .profile-card h2 {
+    font-size: 26px;
+  }
+  .profile-card .email,
+  .profile-card .role {
+    font-size: 16px;
+  }
+  .avatar-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+  .menu {
+    width: 180px;
+  }
+  .upload-btn {
+    padding: 8px 20px;
+  }
+}

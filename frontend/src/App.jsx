@@ -1,155 +1,133 @@
 import React, { useState, useEffect } from "react";
-import AddUser from "./component/AddUser.jsx";
-import "./App.css";
-import axios from "axios";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Signup from "./component/Signup.jsx";
+import Login from "./component/Login.jsx";
+import Profile from "./component/Profile.jsx";
+import Admin from "./component/Admin.jsx";
+import EditProfile from "./component/EditProfile.jsx";
+import ForgotPassword from "./component/ForgotPassword.jsx";
+import ResetPassword from "./component/ResetPassword.jsx";
+import ChangePassword from "./component/ChangePassword.jsx";
+import api from "./axiosConfig"; // baseURL = http://localhost:3000/
 
-function App() {
-  const [users, setUsers] = useState([]);
-  const [editingUser, setEditingUser] = useState(null); // user đang sửa
-  const [name, setName] = useState(""); // input sửa name
-  const [email, setEmail] = useState(""); // input sửa email
-
-  // Lấy danh sách user từ backend
-  const fetchUsers = () => {
-    axios
-      .get("http://localhost:3000/users")
-      .then((res) => setUsers(res.data))
-      .catch((err) => console.error("Lỗi khi tải user:", err));
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  // Thêm user xong thì tải lại danh sách
-  const handleUserAdded = () => {
-    fetchUsers();
-  };
-
-  // Xóa user
-  const handleDelete = async (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa user này?")) {
-      await axios.delete(`http://localhost:3000/users/${id}`);
-      setUsers(users.filter((u) => u._id !== id));
-    }
-  };
-
-  // Mở form sửa
-  const handleEdit = (user) => {
-    setEditingUser(user);
-    setName(user.name);
-    setEmail(user.email);
-  };
-
-  // Lưu thay đổi
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    if (!name || !email) {
-      alert("Vui lòng nhập đầy đủ thông tin!");
-      return;
-    }
-    await axios.put(`http://localhost:3000/users/${editingUser._id}`, {
-      name,
-      email,
-    });
-    setEditingUser(null);
-    fetchUsers();
-  };
-
+function AppWrapper() {
   return (
-    <div className="container">
-      <h1 className="title">💼 Quản lý User</h1>
-
-      {/* --- Thêm user mới --- */}
-      <div className="card">
-        <h2 className="subtitle">Thêm User mới</h2>
-        <AddUser onAdded={handleUserAdded} />
-      </div>
-
-      {/* --- Danh sách người dùng --- */}
-      <div className="card">
-        <h2 className="subtitle">Danh sách người dùng</h2>
-
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: "10px",
-          }}
-        >
-          <thead>
-            <tr style={{ backgroundColor: "#007bff", color: "white" }}>
-              <th style={{ padding: "10px", textAlign: "left", width: "30%" }}>Tên</th>
-              <th style={{ padding: "10px", textAlign: "left", width: "40%" }}>Email</th>
-              <th style={{ padding: "10px", textAlign: "center", width: "30%" }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length > 0 ? (
-              users.map((user) => (
-                <tr
-                  key={user._id}
-                  style={{
-                    backgroundColor: "#f9f9f9",
-                    borderBottom: "1px solid #ddd",
-                  }}
-                >
-                  <td style={{ padding: "10px" }}>{user.name}</td>
-                  <td style={{ padding: "10px" }}>{user.email}</td>
-                  <td style={{ padding: "10px", textAlign: "center" }}>
-                    <button
-                      onClick={() => handleEdit(user)}
-                      style={{ marginRight: "8px" }}
-                    >
-                      Sửa
-                    </button>
-                    <button onClick={() => handleDelete(user._id)}>Xóa</button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="3" style={{ textAlign: "center", padding: "15px" }}>
-                  Không có người dùng nào.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        {/* --- Form sửa user --- */}
-        {editingUser && (
-          <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
-            <h3>Sửa User: {editingUser.name}</h3>
-            <form onSubmit={handleUpdate}>
-              <div style={{ marginBottom: "10px" }}>
-                <label>Tên: </label>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  style={{ marginLeft: "10px" }}
-                />
-              </div>
-              <div style={{ marginBottom: "10px" }}>
-                <label>Email: </label>
-                <input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{ marginLeft: "10px" }}
-                />
-              </div>
-              <button type="submit" style={{ marginRight: "8px" }}>
-                Lưu
-              </button>
-              <button type="button" onClick={() => setEditingUser(null)}>
-                Hủy
-              </button>
-            </form>
-          </div>
-        )}
-      </div>
-    </div>
+    <Router>
+      <App />
+    </Router>
   );
 }
 
-export default App;
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setIsLoggedIn(false);
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await api.get("/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.data && response.data.email) {
+          setIsLoggedIn(true);
+          localStorage.setItem("isLoggedIn", "true");
+        } else {
+          setIsLoggedIn(false);
+          localStorage.removeItem("isLoggedIn");
+        }
+      } catch (err) {
+        console.warn("Auth check failed:", err.message);
+        setIsLoggedIn(false);
+        localStorage.removeItem("isLoggedIn");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem("isLoggedIn", "true");
+  };
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await api.post(
+        "/logout",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } catch (err) {
+      console.error("Logout failed:", err.message);
+    } finally {
+      setIsLoggedIn(false);
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("token");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "100px" }}>
+        Đang kiểm tra đăng nhập...
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      {/* Trang đăng nhập */}
+      <Route path="/" element={<Login onLogin={handleLogin} />} />
+
+      {/* Trang đăng ký */}
+      <Route path="/signup" element={<Signup />} />
+
+      {/* Quên mật khẩu */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      {/* ✅ Reset mật khẩu */}
+      <Route path="/users/reset-password/:token" element={<ResetPassword />} /> 
+
+      {/* Hồ sơ người dùng */}
+      <Route
+        path="/profile"
+        element={isLoggedIn ? <Profile onLogout={handleLogout} /> : <Navigate to="/" />}
+      />
+
+      {/* Chỉnh sửa hồ sơ */}
+      <Route
+        path="/edit-profile"
+        element={isLoggedIn ? <EditProfile /> : <Navigate to="/" />}
+      />
+
+      {/* Đổi mật khẩu */}
+      <Route
+        path="/change-password"
+        element={isLoggedIn ? <ChangePassword /> : <Navigate to="/" />}
+      />
+
+      {/* Trang admin */}
+      <Route
+        path="/admin"
+        element={isLoggedIn ? <Admin onLogout={handleLogout} /> : <Navigate to="/" />}
+      />
+
+      {/* Route mặc định */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+}
+
+export default AppWrapper;

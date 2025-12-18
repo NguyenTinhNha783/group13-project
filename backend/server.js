@@ -4,7 +4,11 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const userRoutes = require('./routes/user'); // route user
+<<<<<<< HEAD
 const sendEmail = require('./sendEmail');
+=======
+const sendEmail = require('./utils/sendEmail');
+>>>>>>> 2ab4e8920067af3b26b4e972f3b1313c4ae18f61
 
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
@@ -33,4 +37,8 @@ mongoose.connect(
 
 // Khởi chạy server
 const PORT = process.env.PORT || 3000;
+<<<<<<< HEAD
 app.listen(PORT, () => console.log(`🌐 Server chạy tại http://localhost:${PORT}`));
+=======
+app.listen(PORT, () => console.log(`🌐 Server chạy tại http://localhost:${PORT}`));
+>>>>>>> 2ab4e8920067af3b26b4e972f3b1313c4ae18f61

@@ -1,6 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
+<<<<<<< HEAD
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^6.0.0",
@@ -12,12 +13,29 @@
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
+=======
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+>>>>>>> 2ab4e8920067af3b26b4e972f3b1313c4ae18f61
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.2",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
+<<<<<<< HEAD
     "nodemailer": "^7.0.10",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
@@ -48,5 +66,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+=======
+    "nodemailer": "^7.0.10"
+>>>>>>> 2ab4e8920067af3b26b4e972f3b1313c4ae18f61
   }
 }
