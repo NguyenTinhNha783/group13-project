@@ -1,53 +1,36 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');  // ← THÊM DÒNG NÀY
-const User = require('./models/User'); 
+const cors = require('cors');
+const userRoutes = require('./routes/user'); // route user
+const sendEmail = require('./utils/sendEmail');
+
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
+
+
 const app = express();
 
-app.use(cors());               // ← THÊM DÒNG NÀY
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-//  Kết nối MongoDB Atlas
-mongoose.connect('mongodb+srv://khang223039_db_user:LcnVp6VGUWSIEXAE@group13-project.iwftep5.mongodb.net/groupDB?retryWrites=true&w=majority&appName=group13-project')
-  .then(() => console.log('✅ Kết nối MongoDB thành công'))
-  .catch(err => console.log('❌ Lỗi kết nối MongoDB:', err));
-
-//  API lấy toàn bộ user
-app.get('/users', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-//  API thêm user mới
-app.post('/users', async (req, res) => {
-  try {
-    const newUser = new User(req.body);
-    await newUser.save();
-    res.status(201).json(newUser); 
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+// Mount route /users
+app.use('/users', userRoutes);
 
 // Trang gốc
 app.get('/', (req, res) => {
-  res.send('Server is running and operational! Use /users endpoint for API.'); 
+  res.send('🚀 Server đang chạy! Truy cập /users để dùng API.');
 });
 
-app.listen(3000, () => {
-  console.log('🚀 Server đang chạy tại http://localhost:3000');
-});
+// Kết nối MongoDB
+mongoose.connect(
+  'mongodb+srv://khang223039_db_user:LcnVp6VGUWSIEXAE@group13-project.iwftep5.mongodb.net/groupDB?retryWrites=true&w=majority&appName=group13-project'
+)
+  .then(() => console.log('✅ Kết nối MongoDB thành công'))
+  .catch(err => console.log('❌ Lỗi kết nối MongoDB:', err));
 
-app.use(express.json());
-
-const userRoutes = require('./routes/user');
-app.use(userRoutes);
-
+// Khởi chạy server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
+app.listen(PORT, () => console.log(`🌐 Server chạy tại http://localhost:${PORT}`));
